@@ -1,6 +1,8 @@
 from torchvision.datasets import MNIST
 import torchvision.transforms as transforms
+import torchvision.transforms.v2 as T 
 from torch.utils.data import DataLoader
+import matplotlib.pyplot as plt
 
 batch_size = 128
 
@@ -11,5 +13,12 @@ test_data = MNIST(root="data/", train=False, download=True, transform=transforms
 train_loader = DataLoader(train_data, batch_size, shuffle=True)
 test_loader = DataLoader(test_data, batch_size, shuffle=False)
 
-
 adversarial_test_loader = DataLoader(test_data, batch_size=1, shuffle=False)
+
+
+noise = T.GaussianNoise(mean=0.0, sigma=0.2, clip=True)
+
+noisy_test_data = []
+
+
+#gaussian_test_loader = DataLoader(test_data, batch_size=1, shuffle=False)

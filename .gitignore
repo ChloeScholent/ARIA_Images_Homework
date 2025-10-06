@@ -1,0 +1,23 @@
+# Ignorer les fichiers compilés
+*.class
+*.o
+*.exe
+
+# Ignorer les dépendances Node.js
+node_modules/
+
+# Ignorer les fichiers Python temporaires
+__pycache__/
+*.pyc
+
+# Ignorer les fichiers de configuration
+env/
+data/*
+config/*.json
+
+# Ignorer les fichiers système
+.DS_Store
+Thumbs.db
+
+# Ignorer le dossier VS Code
+.vscode/
