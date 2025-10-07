@@ -8,6 +8,7 @@ node_modules/
 
 # Ignorer les fichiers Python temporaires
 __pycache__/
+code/__pycache__/
 *.pyc
 
 # Ignorer les fichiers de configuration
