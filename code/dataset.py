@@ -19,6 +19,6 @@ adversarial_test_loader = DataLoader(test_data, batch_size=1, shuffle=False)
 noise = T.GaussianNoise(mean=0.0, sigma=0.2, clip=True)
 
 noisy_test_data = []
-
-
-#gaussian_test_loader = DataLoader(test_data, batch_size=1, shuffle=False)
+for i in test_loader:
+    noisy_test_data.append(noise(i))
+gaussian_test_loader = DataLoader(noisy_test_data, batch_size=1, shuffle=False)
