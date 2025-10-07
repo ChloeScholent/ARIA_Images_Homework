@@ -13,7 +13,7 @@ code/__pycache__/
 
 # Ignorer les fichiers de configuration
 env/
-data/*
+data/
 config/*.json
 
 # Ignorer les fichiers système

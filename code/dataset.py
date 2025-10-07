@@ -1,3 +1,4 @@
+import torch
 from torchvision.datasets import MNIST
 import torchvision.transforms as transforms
 import torchvision.transforms.v2 as T 
@@ -14,11 +15,3 @@ train_loader = DataLoader(train_data, batch_size, shuffle=True)
 test_loader = DataLoader(test_data, batch_size, shuffle=False)
 
 adversarial_test_loader = DataLoader(test_data, batch_size=1, shuffle=False)
-
-
-noise = T.GaussianNoise(mean=0.0, sigma=0.2, clip=True)
-
-noisy_test_data = []
-for i in test_loader:
-    noisy_test_data.append(noise(i))
-gaussian_test_loader = DataLoader(noisy_test_data, batch_size=1, shuffle=False)
