@@ -10,7 +10,6 @@ import numpy as np
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-# FGSM attack code
 def fgsm_attack(image, epsilon, data_grad):
     # Collect the element-wise sign of the data gradient
     sign_data_grad = data_grad.sign()
@@ -24,17 +23,7 @@ def fgsm_attack(image, epsilon, data_grad):
 
 # restores the tensors to their original scale
 def denorm(batch, mean=[0.1307], std=[0.3081]):
-    """
-    Convert a batch of tensors to their original scale.
 
-    Args:
-        batch (torch.Tensor): Batch of normalized tensors.
-        mean (torch.Tensor or list): Mean used for normalization.
-        std (torch.Tensor or list): Standard deviation used for normalization.
-
-    Returns:
-        torch.Tensor: batch of tensors without normalization applied to them.
-    """
     if isinstance(mean, list):
         mean = torch.tensor(mean).to(device)
     if isinstance(std, list):
@@ -43,70 +32,55 @@ def denorm(batch, mean=[0.1307], std=[0.3081]):
     return batch * std.view(1, -1, 1, 1) + mean.view(1, -1, 1, 1)
 
 
-def test( model, device, test_loader, epsilon ):
-
-    # Accuracy counter
+def test_per_class(model, device, test_loader, epsilon):
+    model.eval()
+    n_classes = 10  # pour MNIST
     correct = 0
+    correct_per_class = np.zeros(n_classes)
+    total_per_class = np.zeros(n_classes)
     adv_examples = []
 
-    # Loop over all examples in test set
     for data, target in test_loader:
-
-        # Send the data and label to the device
         data, target = data.to(device), target.to(device)
-
-        # Set requires_grad attribute of tensor. Important for Attack
         data.requires_grad = True
 
-        # Forward pass the data through the model
         output = model(data)
-        init_pred = output.max(1, keepdim=True)[1] # get the index of the max log-probability
+        init_pred = output.max(1, keepdim=True)[1]
 
-        # If the initial prediction is wrong, don't bother attacking, just move on
         if init_pred.item() != target.item():
-            continue
+            continue  # on ne perturbe que les exemples correctement classés
 
-        # Calculate the loss
         loss = F.nll_loss(output, target)
-
-        # Zero all existing gradients
         model.zero_grad()
-
-        # Calculate gradients of model in backward pass
         loss.backward()
-
-        # Collect ``datagrad``
         data_grad = data.grad.data
 
-        # Restore the data to its original scale
+        #Génération du bruit
         data_denorm = denorm(data)
-
-        # Call FGSM Attack
         perturbed_data = fgsm_attack(data_denorm, epsilon, data_grad)
-
-        # Reapply normalization
         perturbed_data_normalized = transforms.Normalize((0.1307,), (0.3081,))(perturbed_data)
 
-        # Re-classify the perturbed image
         output = model(perturbed_data_normalized)
+        final_pred = output.max(1, keepdim=True)[1]
 
-        # Check for success
-        final_pred = output.max(1, keepdim=True)[1] # get the index of the max log-probability
-        if final_pred.item() == target.item():
-            correct += 1
-            # Special case for saving 0 epsilon examples
-            if epsilon == 0 and len(adv_examples) < 5:
-                adv_ex = perturbed_data.squeeze().detach().cpu().numpy()
-                adv_examples.append( (init_pred.item(), final_pred.item(), adv_ex) )
+        label = target.item()
+        total_per_class[label] += 1
+        if final_pred.item() == label:
+            correct_per_class[label] += 1
+            correct +=1
+
+        if len(adv_examples) < 5:  # on garde 5 exemples max pour chaque epsilon
+            adv_ex = perturbed_data.squeeze().detach().cpu().numpy()
+            adv_examples.append((init_pred.item(), final_pred.item(), adv_ex))
+
+    acc_per_class = np.zeros(n_classes)
+    for i in range(n_classes):
+        if total_per_class[i] > 0:
+            acc_per_class[i] = correct_per_class[i] / total_per_class[i]
         else:
-            # Save some adv examples for visualization later
-            if len(adv_examples) < 5:
-                adv_ex = perturbed_data.squeeze().detach().cpu().numpy()
-                adv_examples.append( (init_pred.item(), final_pred.item(), adv_ex) )
+            acc_per_class[i] = np.nan  # aucune image correctement classée avant attaque
 
-    # Calculate final accuracy for this epsilon
-    final_acc = correct/float(len(test_loader))
-    print(f"Epsilon: {epsilon}\tTest Accuracy = {correct} / {len(test_loader)} = {final_acc*100:.2f}%")
+    mean_acc = np.nanmean(acc_per_class)
+    print(f"Epsilon: {epsilon:.2f} | Test Accuracy = {correct} / {float(len(test_loader))} = {correct/float(len(test_loader))*100:.2f}%")
 
-    # Return the accuracy and an adversarial example
-    return final_acc, adv_examples
+    return acc_per_class, adv_examples
