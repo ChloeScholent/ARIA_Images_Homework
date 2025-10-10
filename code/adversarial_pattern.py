@@ -81,6 +81,6 @@ def test_per_class(model, device, test_loader, epsilon):
             acc_per_class[i] = np.nan  # aucune image correctement classée avant attaque
 
     mean_acc = np.nanmean(acc_per_class)
-    print(f"Epsilon: {epsilon:.2f} | Test Accuracy = {correct} / {float(len(test_loader))} = {correct/float(len(test_loader))*100:.2f}%")
+    print(f"Epsilon: {epsilon:.4f} | Test Accuracy = {correct} / {float(len(test_loader))} = {correct/float(len(test_loader))*100:.2f}%")
 
     return acc_per_class, adv_examples

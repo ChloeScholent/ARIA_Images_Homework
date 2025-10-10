@@ -23,3 +23,8 @@ class MNISTCNN(nn.Module):
         return out
 
 
+
+def accuracy_fn(outputs, labels):
+    preds = torch.argmax(outputs, dim=1)
+    acc = (torch.sum(preds == labels).item()/len(preds))*100
+    return acc
