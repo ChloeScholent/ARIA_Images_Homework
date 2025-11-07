@@ -16,7 +16,6 @@ code/__pycache__/
 env/
 data/
 config/*.json
-runs/
 
 # Ignorer les fichiers système
 .DS_Store

@@ -1,9 +1,6 @@
 import torch
 from torch import nn
 import torchvision
-from torchvision.datasets import MNIST
-import torchvision.transforms as transforms
-from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from sklearn.metrics import confusion_matrix, classification_report
 import numpy as np
@@ -50,7 +47,7 @@ def accuracy_fn(outputs, labels):
     acc = (torch.sum(preds == labels).item()/len(preds))*100
     return acc
 
-epochs = 6
+epochs = 5
 
 print('Training...')
 print('\n')
