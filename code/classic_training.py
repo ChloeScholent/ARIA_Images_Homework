@@ -1,7 +1,10 @@
 import torch
 from torch import nn
 import torchvision
-from tqdm.auto import tqdm
+from torchvision.datasets import MNIST
+import torchvision.transforms as transforms
+from torch.utils.data import DataLoader
+from tqdm import tqdm
 from sklearn.metrics import confusion_matrix, classification_report
 import numpy as np
 from pathlib import Path
@@ -52,7 +55,7 @@ epochs = 5
 print('Training...')
 print('\n')
 
-for epoch in range(epochs):
+for epoch in tqdm(range(epochs)):
     losses = []
     test_losses = []
     accs = []
@@ -133,12 +136,12 @@ print("\nClassification Report:\n", classification_report(all_labels, all_preds)
 
 
 #Saving the model
-MODEL_PATH = Path("Models")
-MODEL_PATH.mkdir(parents=True, exist_ok=True)
+# MODEL_PATH = Path("Models")
+# MODEL_PATH.mkdir(parents=True, exist_ok=True)
 
-MODEL_NAME = "MNIST_CNN_Classification.pth"
-MODEL_SAVE_PATH = MODEL_PATH / MODEL_NAME
+# MODEL_NAME = "MNIST_CNN_Classification.pth"
+# MODEL_SAVE_PATH = MODEL_PATH / MODEL_NAME
 
-#save the model state dictionary
-print(f'Saving model to {MODEL_SAVE_PATH}')
-torch.save(obj=MNIST_Model_CNN.state_dict(), f=MODEL_SAVE_PATH)
+# #save the model state dictionary
+# print(f'Saving model to {MODEL_SAVE_PATH}')
+# torch.save(obj=MNIST_Model_CNN.state_dict(), f=MODEL_SAVE_PATH)
